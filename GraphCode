@@ -1,0 +1,107 @@
+#Load in libraries
+library("ggplot2")
+library("stats")
+library("tibble")
+library("dplyr")
+library("readr")
+library("tidyverse")
+library("magrittr")
+library("ggthemes")
+library("showtext")
+
+font_add_google("Quattrocento Sans", "Quattrocento Sans")
+
+#Load in the datasets
+#Life expectancy table by quartile for Male
+health.ineq.quart.M <- read.csv("C:/Users/Zoey/Desktop/TIPInterview/MaleLifeExpectancy.csv")
+#Life expectancy table by quartile for female
+health.ineq.quart.F <- read.csv("C:/Users/Zoey/Desktop/TIPInterview/health_ineq_online_table_6.csv")
+#More covariates, mostly interested in race data here
+czcharac <- read.csv("C:/Users/Zoey/Desktop/TIPInterview/cz_covariates.csv")
+
+#Combine data
+fulldata.F <- health.ineq.quart.F %>% inner_join(czcharac, by = 'cz')
+fulldata.M <- health.ineq.quart.M %>% inner_join(czcharac, by = 'cz')
+
+
+#Create and populate new column based on racial diversity
+#Used the shanon diversity index
+
+#show normality
+qqnorm(fulldata.F$DiversityIndex, pch = 1, frame = FALSE)
+qqline(fulldata.F$DiversityIndex, col = "steelblue", lwd = 2)
+
+
+fulldata.F <- fulldata.F%>%
+  mutate(Quartile=as.factor(Quartile))
+
+fulldata.F %>%
+  ggplot(aes(x = DiversityIndex, LifeExpectancy_RaceAdjusted, col = Quartile, group = Quartile)) +
+  geom_smooth(size = 1.5) +
+  labs(title = "Female Life Expectancy, Income, and Diversity",
+       subtitle = "What effect do they have on each other?",
+       x = "Shannon Diversity Index",
+       y = "Race Adjusted Life Expectancy",
+       color = "Income Quartile") +
+  theme_fivethirtyeight() +
+  theme(axis.title = element_text(), text = element_text(family = "Quattrocento Sans")) + 
+  scale_color_brewer(palette = "YlGn")
+
+fulldata.F %>%
+  ggplot(aes(x = DiversityIndex, LifeExpectancy_RaceAdjusted, col = Quartile, group = Quartile)) +
+  geom_point() +
+  labs(title = "Female Life Expectancy, Income, and Diversity",
+       subtitle = "What effect do they have on each other?",
+       x = "Shannon Diversity Index",
+       y = "Race Adjusted Life Expectancy",
+       color = "Income Quartile") +
+  theme_fivethirtyeight() +
+  theme(axis.title = element_text(), text = element_text(family = "Quattrocento Sans")) + 
+  scale_color_brewer(palette = "Paired")
+
+
+
+
+
+
+#Now for males
+fulldata.M <- fulldata.M%>%
+  mutate(Quartile=as.factor(Quartile))
+
+
+fulldata.M %>%
+  ggplot(aes(x = DiversityIndex, LifeExpectancy, col = Quartile, group = Quartile)) +
+  geom_smooth(size = 1.5) +
+  labs(title = "Male Life Expectancy, Income, and Diversity",
+       subtitle = "What effect do they have on each other?",
+       x = "Shannon Diversity Index",
+       y = "Race Adjusted Life Expectancy",
+       color = "Income Quartile") +
+  theme_fivethirtyeight() +
+  theme(axis.title = element_text(), text = element_text(family = "Quattrocento Sans")) + 
+  scale_color_brewer(palette = "GnBu")
+
+#Now for whiteness
+fulldata.F %>%
+  ggplot(aes(x = share_white2000, LifeExpectancy_RaceAdjusted, col = Quartile, group = Quartile)) +
+  geom_smooth(size = 1.5) +
+  labs(title = "Female Life Expectancy, Income, and Whiteness",
+       subtitle = "What effect do they have on each other?",
+       x = "Percentage White",
+       y = "Race Adjusted Life Expectancy",
+       color = "Income Quartile") +
+  theme_fivethirtyeight() +
+  theme(axis.title = element_text(), text = element_text(family = "Quattrocento Sans")) + 
+  scale_color_brewer(palette = "PuBu")
+
+fulldata.M %>%
+  ggplot(aes(x = share_white2000, LifeExpectancy, col = Quartile, group = Quartile)) +
+  geom_smooth(size = 1.5) +
+  labs(title = "Male Life Expectancy, Income, and Whiteness",
+       subtitle = "What effect do they have on each other?",
+       x = "Percentage White",
+       y = "Race Adjusted Life Expectancy",
+       color = "Income Quartile") +
+  theme_fivethirtyeight() +
+  theme(axis.title = element_text(), text = element_text(family = "Quattrocento Sans")) + 
+  scale_color_brewer(palette = "PuBu")
